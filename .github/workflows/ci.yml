@@ -1,0 +1,45 @@
+name: CI/CD 7solution-app
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    tags:
+      - 'v*.*.*'   # เช่น v1.0.0
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Set image tag
+      id: vars
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          # ถ้าเป็น release tag เช่น v1.0.0 → ใช้ชื่อนั้นตรง ๆ
+          echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        elif [[ "${GITHUB_REF}" == refs/heads/dev ]]; then
+          # ถ้าเป็น branch dev → ใช้ dev-<sha>
+          echo "TAG=dev-${GITHUB_SHA::7}" >> $GITHUB_ENV
+        else
+          # main branch → ใช้ sha ตรง ๆ
+          echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+        fi
+
+    - name: Build Docker image
+      run: |
+        docker build -t peerasilp/7solution-app:${TAG} ./app
+
+    - name: Push Docker image
+      run: |
+        docker push peerasilp/7solution-app:${TAG}
