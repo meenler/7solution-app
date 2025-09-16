@@ -6,7 +6,7 @@ on:
       - main
       - dev
     tags:
-      - 'v*.*.*'   # เช่น v1.0.0
+      - 'v*.*.*'   
 
 jobs:
   build-and-push:
@@ -26,13 +26,10 @@ jobs:
       id: vars
       run: |
         if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-          # ถ้าเป็น release tag เช่น v1.0.0 → ใช้ชื่อนั้นตรง ๆ
           echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
         elif [[ "${GITHUB_REF}" == refs/heads/dev ]]; then
-          # ถ้าเป็น branch dev → ใช้ dev-<sha>
           echo "TAG=dev-${GITHUB_SHA::7}" >> $GITHUB_ENV
         else
-          # main branch → ใช้ sha ตรง ๆ
           echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
         fi
 
