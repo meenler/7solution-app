@@ -4,8 +4,6 @@ FROM golang:1.21 AS builder
 WORKDIR /app
 
 COPY go.mod ./
-# ถ้ามี go.sum ให้ใส่ด้วย
-# COPY go.sum ./
 
 RUN go mod download
 
